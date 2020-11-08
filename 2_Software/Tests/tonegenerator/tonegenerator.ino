@@ -1,4 +1,4 @@
-const int buzzer = 4; //buzzer to arduino pin 9
+const int buzzer = 5; //buzzer to arduino pin 9
 
 
 void setup(){
