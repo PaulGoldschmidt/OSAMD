@@ -4,7 +4,7 @@
 
 #define lenght 16.0
 
-double percent=100.0;
+double percent=60.5;
 unsigned char b;
 unsigned int peace;
 
@@ -76,22 +76,6 @@ void Setup_I2C(){
 }
 
 void LCD_Draw() {
-
-  lcd.setCursor(0, 0);
-
-  //ADC conversion
-
-  unsigned int value = analogRead(A0);
-
-  percent = value/1024.0*100.0;
-
-  lcd.print(value);
-
-  lcd.print(" - ");
-
-  lcd.print(percent);
-  lcd.print(" %   ");
-
   lcd.setCursor(0,1);
 
   double a=lenght/100*percent;
@@ -102,7 +86,7 @@ void LCD_Draw() {
 
     for (int i=1;i<a;i++) {
 
-      lcd.write(4);
+      lcd.write(byte(4));
 
       b=i;
     }
@@ -122,20 +106,20 @@ void LCD_Draw() {
     break;
 
   case 1:
-    lcd.write(0);
+    lcd.write(byte(0));
 
     break;
 
   case 2:
-    lcd.write(1);
+    lcd.write(byte(1));
     break;
 
   case 3:
-    lcd.write(2);
+    lcd.write(byte(2));
     break;
 
   case 4:
-    lcd.write(3);
+    lcd.write(byte(3));
     break;
 
   }
@@ -145,6 +129,4 @@ void LCD_Draw() {
 
     lcd.print(" ");
   }
-
-  ;
 }
