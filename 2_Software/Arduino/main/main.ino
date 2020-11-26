@@ -1,9 +1,10 @@
-#include <Wire.h> 
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-#define lenght 16.0 //LCD Charakterlänge
+#define lenght 16.0
+double percent;
 
 const byte buzzer = 6; //buzzer to arduino pin 5
 const byte LED_red = 9;
@@ -37,13 +38,25 @@ void loop() {
   LCD_Draw();
 }
 void preheating() {
-  lcd.setCursor(0,0);
+  lcd.setCursor(0, 0);
   lcd.print("Heize Sensor...");
   unsigned long startOfPreheating = millis(); //akutelle Laufzeit des Microcontrollers speichern.
   Serial.print("Heize den Sensor vor... Aktuelle Laufzeit: ");
   Serial.print(startOfPreheating);
   Serial.println(" ms.");
-  while ((millis() - startOfPreheating) < 900000) {
-    Serial.println(millis() / 1000);
+  while (millis() < 900000) {
+    int prozentwert = (millis() / 9000);
+    Serial.print("Der Sensor heizt seit ");
+    Serial.print(millis());
+    Serial.print(" ms vor, das sind ");
+    Serial.print(prozentwert);
+    Serial.println(" % der Vorheizphase");
+    delay(1000);
+    lcd.setCursor(0, 0);
+    lcd.print("Vorheizen: ");
+    lcd.print(prozentwert);
+    lcd.print(" %!");
+    percent = prozentwert;
+    LCD_Draw();
   }
 }

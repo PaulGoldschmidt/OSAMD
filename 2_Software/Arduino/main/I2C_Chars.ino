@@ -1,10 +1,3 @@
-//With help from https://www.electronicsblog.net/
-//Arduino LCD horizontal progress bar using custom characters
-#include <LiquidCrystal.h>
-
-#define lenght 16.0
-
-double percent=70.5;
 unsigned char b;
 unsigned int peace;
 
@@ -62,13 +55,13 @@ byte p5[8] = {
   0x1F};
 
 void Setup_I2C(){
+  lcd.begin();
   // initialize the LCD
   lcd.createChar(0, p1);
   lcd.createChar(1, p2);
   lcd.createChar(2, p3);
   lcd.createChar(3, p4);
   lcd.createChar(4, p5);
-  lcd.begin();
   // Turn on the blacklight and print a message.
   lcd.backlight();
   lcd.print("Starte OSAMD...");
