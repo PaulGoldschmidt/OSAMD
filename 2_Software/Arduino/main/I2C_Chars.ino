@@ -4,7 +4,7 @@
 
 #define lenght 16.0
 
-double percent=60.5;
+double percent=70.5;
 unsigned char b;
 unsigned int peace;
 
@@ -71,7 +71,7 @@ void Setup_I2C(){
   lcd.begin();
   // Turn on the blacklight and print a message.
   lcd.backlight();
-  lcd.print("Starting OSAMD...");
+  lcd.print("Starte OSAMD...");
   delay(1000);
 }
 

@@ -7,17 +7,22 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 const byte buzzer = 6; //buzzer to arduino pin 5
 const byte LED_red = 9;
-const byte LED_green = 10;
-const byte LED_blue = 12;
+const byte LED_blue = 10;
+const byte LED_green = 11;
+const byte MQ135 = A0;
 
 void setup() {
-  // initialize serial communication at 9600 bits per second:
+  // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);
   Setup_I2C();
-  pinMode(buzzer, OUTPUT); // Set buzzer - pin 5 as an output
-  pinMode(LED_red, OUTPUT); // Set buzzer - pin 5 as an output
-  pinMode(LED_green, OUTPUT); // Set buzzer - pin 5 as an output
-  pinMode(LED_blue, OUTPUT); // Set buzzer - pin 5 as an output
+  pinMode(buzzer, OUTPUT); // Die folgenden Pins als Ausgang initalisieren:
+  pinMode(LED_red, OUTPUT);
+  pinMode(LED_green, OUTPUT);
+  pinMode(LED_blue, OUTPUT);
+  digitalWrite(LED_red, HIGH); //alle LED-Pins auf "HIGH" setzten, so ist die LED aus.
+  digitalWrite(LED_green, HIGH);
+  digitalWrite(LED_blue, HIGH);
+  preheating();
 }
 
 void loop() {
@@ -29,6 +34,16 @@ void loop() {
   //delay(1000);        // ...for 1 sec
   //noTone(buzzer);     // Stop sound...
   //delay(1000);        // ...for 1sec
-  digitalWrite(LED_red, HIGH);
   LCD_Draw();
+}
+void preheating() {
+  lcd.setCursor(0,0);
+  lcd.print("Heize Sensor...");
+  unsigned long startOfPreheating = millis(); //akutelle Laufzeit des Microcontrollers speichern.
+  Serial.print("Heize den Sensor vor... Aktuelle Laufzeit: ");
+  Serial.print(startOfPreheating);
+  Serial.println(" ms.");
+  while ((millis() - startOfPreheating) < 900000) {
+    Serial.println(millis() / 1000);
+  }
 }
