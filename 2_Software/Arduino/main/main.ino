@@ -11,6 +11,7 @@ const byte LED_red = 9;
 const byte LED_blue = 10;
 const byte LED_green = 11;
 const byte MQ135 = A0;
+const byte buttonPin = A6;     // the number of the pushbutton pin
 
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
@@ -37,26 +38,54 @@ void loop() {
   //delay(1000);        // ...for 1sec
   LCD_Draw();
 }
-void preheating() {
+void preheating() { // Die Vorheizschleife
+  bool skipPreheating = false;
   lcd.setCursor(0, 0);
   lcd.print("Heize Sensor...");
   unsigned long startOfPreheating = millis(); //akutelle Laufzeit des Microcontrollers speichern.
   Serial.print("Heize den Sensor vor... Aktuelle Laufzeit: ");
   Serial.print(startOfPreheating);
   Serial.println(" ms.");
-  while (millis() < 900000) {
-    int prozentwert = (millis() / 9000);
+  digitalWrite(LED_red, LOW); //Die LED Rot machen
+  lcd.clear();
+  while ((millis() < 900000) && (skipPreheating == false)){
+    int millis100pressed = 0; // Für das Überspringen der Vorheizphase Zählervariable initalisieren
+    int prozentwert = (millis() / 9000); //Prozentwert der Vorheizzeit berechnen.
     Serial.print("Der Sensor heizt seit ");
     Serial.print(millis());
     Serial.print(" ms vor, das sind ");
     Serial.print(prozentwert);
     Serial.println(" % der Vorheizphase");
     delay(1000);
-    lcd.setCursor(0, 0);
+    lcd.setCursor(0, 0); //Prozentwert auf das LCD Plotten
     lcd.print("Vorheizen: ");
     lcd.print(prozentwert);
-    lcd.print(" %!");
+    lcd.print(" %");
     percent = prozentwert;
-    LCD_Draw();
+    LCD_Draw(); // Die Funktion "LCD_Draw" Aufrufen 
+    while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegeangen
+      // turn LED on:
+      Serial.println("Knopf gedrückt!");
+      millis100pressed++;
+      delay(100);
+      if (millis100pressed >= 40) {
+        Serial.println("Knopf 4 Sekunden am Stück gedrückt, überspringe Vorwärmen.");
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Ueberspringe");
+        lcd.setCursor(0, 1);
+        lcd.print("Vorheizen!");
+        digitalWrite(LED_red, HIGH); //Die auf Grün umschalten
+        digitalWrite(LED_green, LOW);
+        delay(3000);
+        skipPreheating = true;
+        break;
+      }
+    }
   }
+}
+
+bool buttonvalue() { // Diese Schleife wandelt den analogen Wert des Knopfes in einen wahr/unwahr-Wert um.
+  if (analogRead(buttonPin) < 512) return true;
+  else return false;
 }

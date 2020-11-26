@@ -64,8 +64,6 @@ void Setup_I2C(){
   lcd.createChar(4, p5);
   // Turn on the blacklight and print a message.
   lcd.backlight();
-  lcd.print("Starte OSAMD...");
-  delay(1000);
 }
 
 void LCD_Draw() {
