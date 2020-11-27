@@ -29,7 +29,7 @@ void setup() {
 
 void loop() {
   int sensorValue = analogRead(A0);
-  // print out the value you read:
+  Serial.print("Aktuelle Luftqualität: ");
   Serial.println(sensorValue);
   //delay(1000);
   //tone(buzzer, 440); // Send 440 Hz sound signal...
@@ -37,18 +37,38 @@ void loop() {
   //noTone(buzzer);     // Stop sound...
   //delay(1000);        // ...for 1sec
   LCD_Draw();
+  int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
+  while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+    Serial.println("Knopf gedrückt!");
+    millis100pressed++;
+    delay(100);
+    if (millis100pressed >= 40) {
+      Serial.println("Knopf 4 Sekunden am Stück gedrückt");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Ueberspringe");
+      lcd.setCursor(0, 1);
+      lcd.print("Vorheizen!");
+      digitalWrite(LED_red, HIGH); //Die auf Grün umschalten
+      digitalWrite(LED_green, LOW);
+      delay(3000);
+      skipPreheating = true;
+      break;
+    }
+  }
 }
 void preheating() { // Die Vorheizschleife
   bool skipPreheating = false;
-  lcd.setCursor(0, 0);
-  lcd.print("Heize Sensor...");
+  LCD_Startup();
   unsigned long startOfPreheating = millis(); //akutelle Laufzeit des Microcontrollers speichern.
   Serial.print("Heize den Sensor vor... Aktuelle Laufzeit: ");
   Serial.print(startOfPreheating);
   Serial.println(" ms.");
-  digitalWrite(LED_red, LOW); //Die LED Rot machen
+  digitalWrite(LED_green, HIGH); // LED wieder aus
+  digitalWrite(LED_blue, HIGH);
+  digitalWrite(LED_red, LOW); //Nur Rot bleibt an
   lcd.clear();
-  while ((millis() < 900000) && (skipPreheating == false)){
+  while ((millis() < 900000) && (skipPreheating == false)) {
     int millis100pressed = 0; // Für das Überspringen der Vorheizphase Zählervariable initalisieren
     int prozentwert = (millis() / 9000); //Prozentwert der Vorheizzeit berechnen.
     Serial.print("Der Sensor heizt seit ");
@@ -62,9 +82,8 @@ void preheating() { // Die Vorheizschleife
     lcd.print(prozentwert);
     lcd.print(" %");
     percent = prozentwert;
-    LCD_Draw(); // Die Funktion "LCD_Draw" Aufrufen 
+    LCD_Draw(); // Die Funktion "LCD_Draw" Aufrufen
     while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegeangen
-      // turn LED on:
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
       delay(100);
@@ -83,6 +102,8 @@ void preheating() { // Die Vorheizschleife
       }
     }
   }
+  lcd.clear();
+  digitalWrite(LED_red, HIGH); //alle LED-Pins auf "HIGH" setzten, so ist die LED aus.
 }
 
 bool buttonvalue() { // Diese Schleife wandelt den analogen Wert des Knopfes in einen wahr/unwahr-Wert um.
