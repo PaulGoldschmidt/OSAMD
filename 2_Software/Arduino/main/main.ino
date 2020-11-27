@@ -14,8 +14,11 @@ const byte LED_red = 9;
 const byte LED_blue = 10;
 const byte LED_green = 11;
 const byte MQ135 = A0;
-const byte buttonPin = A6;     // the number of the pushbutton pin
+const byte buttonPin = A6; // the number of the pushbutton pin
 
+bool filpbit = false; // ein Bit was flippt, wenn die rote Stufe erreicht ist. Damit wird die LED zum Blinken gebracht.
+byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der Roten stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
+bool buzzer_active = true;
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);
@@ -25,9 +28,8 @@ void setup() {
   pinMode(LED_green, OUTPUT);
   pinMode(LED_blue, OUTPUT);
   LED_off();
-  Serial.println(buttonvalue() ? "HIGH" : "LOW");
   if (buttonvalue() == false) {
-      preheating();
+    preheating();
   }
 }
 
@@ -54,6 +56,42 @@ void loop() {
       break;
     }
   }
+  LED_off();
+  if (percent <= 75) {
+    Serial.println("Damit ist die Luftqualität im grünen Bereich.");
+    //bei 3/4 des Maximalwerts ist die Luftqualität gut
+    digitalWrite(LED_green, LOW); //Damit ist die LED Grün
+  }
+  else if ((percent >= 75) && (percent <= 85)) {
+    Serial.println("Damit ist die Luftqualität im gelben Bereich.");
+    //jetzt sollte gelüftet werden, damit die LED Gelb
+    digitalWrite(LED_green, LOW);
+    digitalWrite(LED_red, LOW);
+  }
+  else {
+    Serial.println("Damit ist die Luftqualität im roten Bereich.");
+    Serial.println(filpbit ? "HIGH" : "LOW");
+    //die Luftqualität ist sehr schlecht, es sollte dringend gelüftet werden!
+    if (filpbit == false) { //mit diesen Bedingungen binkt die LED
+      digitalWrite(LED_red, LOW); //LED Rot
+      filpbit = true;
+    }
+    else {
+      digitalWrite(LED_red, HIGH);
+      filpbit = false;
+    }
+
+    if ((counter_buzzeralarm >= 120) && (buzzer_active == true)) { //und hier wird ein mal pro minute der Buzzer aktiv, wenn eingeschaltet
+      tone(buzzer, 440);
+      delay(300);
+      noTone(buzzer);
+      counter_buzzeralarm = 0;
+    }
+    else if (buzzer_active == false) {
+      counter_buzzeralarm = 0;
+    }
+    else counter_buzzeralarm++; //sonst hochzählen
+  }
   delay(500);
 }
 void preheating() { // Die Vorheizschleife
@@ -63,8 +101,7 @@ void preheating() { // Die Vorheizschleife
   Serial.print("Heize den Sensor vor... Aktuelle Laufzeit: ");
   Serial.print(startOfPreheating);
   Serial.println(" ms.");
-  digitalWrite(LED_green, HIGH); // LED wieder aus
-  digitalWrite(LED_blue, HIGH);
+  LED_off(); // LED wieder aus
   digitalWrite(LED_red, LOW); //Nur Rot bleibt an
   lcd.clear();
   while ((millis() < 900000) && (skipPreheating == false)) {
@@ -112,6 +149,6 @@ bool buttonvalue() { // Diese Schleife wandelt den analogen Wert des Knopfes in 
 
 void LED_off() {
   digitalWrite(LED_red, HIGH); // LED wieder aus
-  digitalWrite(LED_green, HIGH); 
+  digitalWrite(LED_green, HIGH);
   digitalWrite(LED_blue, HIGH);
 }
