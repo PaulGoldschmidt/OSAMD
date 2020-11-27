@@ -1,12 +1,15 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-// Set the LCD address to 0x27 for a 16 chars and 2 line display
+// I2C-Adresse des Display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define lenght 16.0
 double percent;
 
-const byte buzzer = 6; //buzzer to arduino pin 5
+// Einstellungen für den Betrieb der Sensoreinheit
+#define maximalwert 512 //Die maximal erlaubte Schlecht-Luftqualität (Standart: 512, Maximal: 1024, Grundwert des Sensors bei sehr guter Luft: circa 250)
+
+const byte buzzer = 6; //buzzer to arduino pin 6
 const byte LED_red = 9;
 const byte LED_blue = 10;
 const byte LED_green = 11;
@@ -21,21 +24,24 @@ void setup() {
   pinMode(LED_red, OUTPUT);
   pinMode(LED_green, OUTPUT);
   pinMode(LED_blue, OUTPUT);
-  digitalWrite(LED_red, HIGH); //alle LED-Pins auf "HIGH" setzten, so ist die LED aus.
-  digitalWrite(LED_green, HIGH);
-  digitalWrite(LED_blue, HIGH);
-  preheating();
+  LED_off();
+  Serial.println(buttonvalue() ? "HIGH" : "LOW");
+  if (buttonvalue() == false) {
+      preheating();
+  }
 }
 
 void loop() {
-  int sensorValue = analogRead(A0);
+  percent = ((float)analogRead(A0) / (float)maximalwert) * 100; // Den Prozentwert des Maximalwertes
+  float prozentwert = 100 - percent; //hier so, dass niedrigere Werte besser sind
   Serial.print("Aktuelle Luftqualität: ");
-  Serial.println(sensorValue);
-  //delay(1000);
-  //tone(buzzer, 440); // Send 440 Hz sound signal...
-  //delay(1000);        // ...for 1 sec
-  //noTone(buzzer);     // Stop sound...
-  //delay(1000);        // ...for 1sec
+  Serial.print(analogRead(A0));
+  Serial.print(", das entspricht ");
+  Serial.print(prozentwert);
+  Serial.println(" %. ");
+  lcd.setCursor(0, 0);
+  lcd.print("Luftqual.: ");
+  lcd.print(prozentwert);
   LCD_Draw();
   int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
   while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
@@ -43,19 +49,12 @@ void loop() {
     millis100pressed++;
     delay(100);
     if (millis100pressed >= 40) {
-      Serial.println("Knopf 4 Sekunden am Stück gedrückt");
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Ueberspringe");
-      lcd.setCursor(0, 1);
-      lcd.print("Vorheizen!");
-      digitalWrite(LED_red, HIGH); //Die auf Grün umschalten
-      digitalWrite(LED_green, LOW);
-      delay(3000);
-      skipPreheating = true;
+      LED_off();
+      LCD_Config();
       break;
     }
   }
+  delay(500);
 }
 void preheating() { // Die Vorheizschleife
   bool skipPreheating = false;
@@ -109,4 +108,10 @@ void preheating() { // Die Vorheizschleife
 bool buttonvalue() { // Diese Schleife wandelt den analogen Wert des Knopfes in einen wahr/unwahr-Wert um.
   if (analogRead(buttonPin) < 512) return true;
   else return false;
+}
+
+void LED_off() {
+  digitalWrite(LED_red, HIGH); // LED wieder aus
+  digitalWrite(LED_green, HIGH); 
+  digitalWrite(LED_blue, HIGH);
 }

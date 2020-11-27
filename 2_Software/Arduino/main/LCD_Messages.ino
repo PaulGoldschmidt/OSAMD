@@ -1,4 +1,5 @@
 void LCD_Startup() { //Die LED-Startup-Anzeige
+  Serial.println("Starte das OSAMD-Projekt!");
   digitalWrite(LED_green, LOW);
   lcd.clear();
   lcd.setCursor(2, 0);
@@ -22,5 +23,19 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
   lcd.print("Ueberspringen:");
   lcd.setCursor(0, 1);
   lcd.print("5 Sek. Druecken");
-  delay(2500);
+  delay(3500);
+}
+
+void LCD_Config() {
+  Serial.println("Knopf 4 Sekunden am Stück gedrückt");
+  lcd.clear();
+  tone(buzzer, 440);
+  lcd.setCursor(0, 0);
+  lcd.print("Konfigurations-");
+  lcd.setCursor(0, 1);
+  lcd.print("Assistent");
+  digitalWrite(LED_blue, LOW); //Die auf Blau umschalten
+  delay(300);
+  noTone(buzzer);
+  delay(2700);
 }
