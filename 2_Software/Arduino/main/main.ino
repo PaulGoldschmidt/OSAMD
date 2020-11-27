@@ -85,6 +85,10 @@ void loop() {
       tone(buzzer, 440);
       delay(300);
       noTone(buzzer);
+      delay(300);
+      tone(buzzer, 440);
+      delay(300);
+      noTone(buzzer);
       counter_buzzeralarm = 0;
     }
     else if (buzzer_active == false) {
