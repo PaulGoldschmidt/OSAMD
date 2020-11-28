@@ -22,7 +22,7 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
   lcd.setCursor(0, 0);
   lcd.print("\365berspringen:"); //Überspringen mit \365 als Ü kodiertem Charakter
   lcd.setCursor(0, 1);
-  lcd.print("5 Sek. Druecken");
+  lcd.print("5 Sek. Dr\365cken"); // Drücken
   delay(3500);
 }
 
@@ -54,6 +54,21 @@ void LCD_Config() {
     }
     delay(100);
     countertrybutton++;
+     while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+      Serial.println("Knopf gedrückt!");
+      millis100pressed++;
+      delay(100);
+      if (millis100pressed >= 40) {
+        buttonpressedlong = true;
+      }
+      if (buttonpressedlong == false) {
+        buzzer_active = !buzzer_active;
+        lcd.clear();
+        lcd.setCursor(0, 1);
+        if (buzzer_active == true) lcd.print("Aktiviert");
+        else lcd.print("Stumm");
+      }
+    }
   }
   if (buttonpressed == false) {
     return;
@@ -61,18 +76,6 @@ void LCD_Config() {
   buttonpressed = false; // Die Variablen wieder zurücksetzen.
   countertrybutton = 0;
   while (buttonpressedlong == false) {
-    while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
-      Serial.println("Knopf gedrückt!");
-      millis100pressed++;
-      delay(100);
-      if (millis100pressed >= 40) {
-        buttonpressedlong = true;
-      }
-    }
-    if (buttonpressedlong == false) {
-      buzzer_active = !buzzer_active;
-      if (buzzer_active == true) lcd.print("Aktiviert");
-      else lcd.print("Stumm");
-    }
+   
   }
 }
