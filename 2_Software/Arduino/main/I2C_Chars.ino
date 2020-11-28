@@ -1,9 +1,7 @@
 unsigned char b;
 unsigned int peace;
 
-// custom charaters
-
-//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+// Fortschrittsbalken Charaktere:
 byte p1[8] = {
   0x10,
   0x10,

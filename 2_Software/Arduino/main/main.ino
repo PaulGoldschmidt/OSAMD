@@ -19,6 +19,7 @@ const byte buttonPin = A6; // the number of the pushbutton pin
 bool filpbit = false; // ein Bit was flippt, wenn die rote Stufe erreicht ist. Damit wird die LED zum Blinken gebracht.
 byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der Roten stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
 bool buzzer_active = true;
+
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);

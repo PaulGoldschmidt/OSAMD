@@ -27,6 +27,9 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
 }
 
 void LCD_Config() {
+  int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
+  unsigned int countertrybutton = 0; //Diese Variable spreichert, wie häufig bereits geprüft wurde, ob der Knopf schon gedrückt wurde.
+  bool buttonpressed = false;
   Serial.println("Knopf 4 Sekunden am Stück gedrückt");
   lcd.clear();
   tone(buzzer, 440);
@@ -38,4 +41,28 @@ void LCD_Config() {
   delay(300);
   noTone(buzzer);
   delay(2700);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Hinweistoene:");
+  lcd.setCursor(0, 1);
+  if (buzzer_active == true) lcd.print("Aktiviert");
+  else lcd.print("Stumm");
+  while ((countertrybutton <= 200) && (buttonpressed = false)) {
+    if (buttonvalue() == true) {
+      buttonpressed = true; //dann wird wieder aus der Funktion gesprungen
+    }
+    delay(100);
+    countertrybutton++;
+  }
+  buttonpressed = false;
+  while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+    Serial.println("Knopf gedrückt!");
+    millis100pressed++;
+    delay(100);
+    if (millis100pressed >= 40) {
+      LED_off();
+      LCD_Config();
+      break;
+    }
+  }
 }
