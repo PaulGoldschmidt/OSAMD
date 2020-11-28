@@ -132,7 +132,7 @@ void preheating() { // Die Vorheizschleife
         Serial.println("Knopf 4 Sekunden am Stück gedrückt, überspringe Vorwärmen.");
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("Ueberspringe");
+        lcd.print("\365berspringe"); //Überspringe mit \365 als Ü kodiertem Charakter
         lcd.setCursor(0, 1);
         lcd.print("Vorheizen!");
         digitalWrite(LED_red, HIGH); //Die auf Grün umschalten
