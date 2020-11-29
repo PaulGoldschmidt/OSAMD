@@ -51,7 +51,7 @@ void loop() {
     Serial.println("Knopf gedrückt!");
     millis100pressed++;
     delay(100);
-    if (millis100pressed >= 40) {
+    if (millis100pressed >= 30) {
       LED_off();
       LCD_Config();
       break;
@@ -71,7 +71,6 @@ void loop() {
   }
   else {
     Serial.println("Damit ist die Luftqualität im roten Bereich.");
-    Serial.println(filpbit ? "HIGH" : "LOW");
     //die Luftqualität ist sehr schlecht, es sollte dringend gelüftet werden!
     if (filpbit == false) { //mit diesen Bedingungen binkt die LED
       digitalWrite(LED_red, LOW); //LED Rot
