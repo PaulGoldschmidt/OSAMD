@@ -34,14 +34,16 @@ void LCD_Config() {
   bool changevalue = false;
   Serial.println("Knopf 4 Sekunden am Stück gedrückt");
   lcd.clear();
-  tone(buzzer, 440);
+  if (buzzer_active == true) {
+    tone(buzzer, 440);
+    delay(300);
+    noTone(buzzer);
+  }
   lcd.setCursor(0, 0);
   lcd.print("Konfigurations-");
   lcd.setCursor(0, 1);
   lcd.print("Assistent");
   digitalWrite(LED_blue, LOW); //Die auf Blau umschalten
-  delay(300);
-  noTone(buzzer);
   delay(2700);
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -123,7 +125,7 @@ void LCD_Config() {
         lcd.print("Eingeschaltet");
       }
       else {
-        lcd.noBacklight(); 
+        lcd.noBacklight();
         lcd.print("Ausgeschaltet");
       }
     }
