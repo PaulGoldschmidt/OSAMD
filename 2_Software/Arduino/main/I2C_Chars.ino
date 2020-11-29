@@ -10,7 +10,8 @@ byte p1[8] = {
   0x10,
   0x10,
   0x10,
-  0x10};
+  0x10
+};
 
 byte p2[8] = {
   0x18,
@@ -20,7 +21,8 @@ byte p2[8] = {
   0x18,
   0x18,
   0x18,
-  0x18};
+  0x18
+};
 
 byte p3[8] = {
   0x1C,
@@ -30,7 +32,8 @@ byte p3[8] = {
   0x1C,
   0x1C,
   0x1C,
-  0x1C};
+  0x1C
+};
 
 byte p4[8] = {
   0x1E,
@@ -40,7 +43,8 @@ byte p4[8] = {
   0x1E,
   0x1E,
   0x1E,
-  0x1E};
+  0x1E
+};
 
 byte p5[8] = {
   0x1F,
@@ -50,71 +54,75 @@ byte p5[8] = {
   0x1F,
   0x1F,
   0x1F,
-  0x1F};
+  0x1F
+};
 
-void Setup_I2C(){
+void Setup_I2C() {
   lcd.begin();
-  // initialize the LCD
+  // i2c-Display intialisieren
   lcd.createChar(0, p1);
   lcd.createChar(1, p2);
   lcd.createChar(2, p3);
   lcd.createChar(3, p4);
   lcd.createChar(4, p5);
-  // Turn on the blacklight and print a message.
-  lcd.backlight();
+  // Hintergrundbeleuchtung an, wenn Variable dafür wahr.
+  if (I2C_backlight == true) {
+    lcd.backlight();
+  }
+  else lcd.noBacklight(); 
 }
 
 void LCD_Draw() {
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
 
-  double a=lenght/100*percent;
+  double a = lenght / 100 * percent;
 
- // drawing black rectangles on LCD
+  // drawing black rectangles on LCD
 
-  if (a>=1) {
+  if (a >= 1) {
 
-    for (int i=1;i<a;i++) {
+    for (int i = 1; i < a; i++) {
 
       lcd.write(byte(4));
 
-      b=i;
+      b = i;
     }
 
-    a=a-b;
+    a = a - b;
 
   }
 
-  peace=a*5;
+  peace = a * 5;
 
-// drawing charater's colums
+  // drawing charater's colums
 
   switch (peace) {
 
-  case 0:
+    case 0:
 
-    break;
+      break;
 
-  case 1:
-    lcd.write(byte(0));
+    case 1:
+      lcd.write(byte(0));
 
-    break;
+      break;
 
-  case 2:
-    lcd.write(byte(1));
-    break;
+    case 2:
+      lcd.write(byte(1));
+      break;
 
-  case 3:
-    lcd.write(byte(2));
-    break;
+    case 3:
+      lcd.write(byte(2));
+      break;
 
-  case 4:
-    lcd.write(byte(3));
-    break;
+    case 4:
+      lcd.write(byte(3));
+      break;
 
   }
 
-//clearing line
-  for (int i =0;i<(lenght-b);i++) {
+  //clearing line
+  for (int i = 0; i < (lenght - b); i++) {
 
     lcd.print(" ");
   }

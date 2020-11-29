@@ -86,7 +86,6 @@ void LCD_Config() {
   }
   buttonpressed = false; // Die Variablen wieder zurücksetzen.
   countertrybutton = 0;
-  while (buttonpressedlong == false) {
-
-  }
+  EEPROM.write(0, buzzer_active);
+  EEPROM.write(1, I2C_backlight);
 }

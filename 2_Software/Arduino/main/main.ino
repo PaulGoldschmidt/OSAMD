@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <EEPROM.h>
 
 // I2C-Adresse des Display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -19,11 +20,14 @@ const byte buttonPin = A6; // the number of the pushbutton pin
 bool filpbit = false; // ein Bit was flippt, wenn die rote Stufe erreicht ist. Damit wird die LED zum Blinken gebracht.
 byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der Roten stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
 bool buzzer_active = true;
+bool I2C_backlight = true;
 
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);
   Setup_I2C();
+  buzzer_active = EEPROM.read(0); //Lese aus den nichtflüchtigen Speicher die Konfigurationsvariablen
+  I2C_backlight = EEPROM.read(1);
   pinMode(buzzer, OUTPUT); // Die folgenden Pins als Ausgang initalisieren:
   pinMode(LED_red, OUTPUT);
   pinMode(LED_green, OUTPUT);
