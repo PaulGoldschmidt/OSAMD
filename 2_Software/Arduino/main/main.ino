@@ -25,9 +25,13 @@ bool I2C_backlight = true;
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);
-  Setup_I2C();
   buzzer_active = EEPROM.read(0); //Lese aus den nichtflüchtigen Speicher die Konfigurationsvariablen
   I2C_backlight = EEPROM.read(1);
+  Setup_I2C();
+  Serial.print("Gelesen aus dem EEPROM: Benachrichtigungstöne: ");
+  Serial.print(buzzer_active ? "EIN" : "AUS");
+  Serial.print(" | Hintergrundbeleuchtung des Displays: ");
+  Serial.println(I2C_backlight ? "EIN" : "AUS");
   pinMode(buzzer, OUTPUT); // Die folgenden Pins als Ausgang initalisieren:
   pinMode(LED_red, OUTPUT);
   pinMode(LED_green, OUTPUT);

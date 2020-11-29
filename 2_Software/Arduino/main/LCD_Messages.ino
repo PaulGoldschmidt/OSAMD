@@ -49,10 +49,7 @@ void LCD_Config() {
   lcd.setCursor(0, 1);
   if (buzzer_active == true) lcd.print("Aktiviert");
   else lcd.print("Stumm");
-  while ((countertrybutton <= 200) && (buttonpressed == false)) {
-    if (buttonvalue() == true) {
-      buttonpressed = true; //dann wird wieder aus der Funktion gesprungen
-    }
+  while ((countertrybutton <= 200) && (buttonpressedlong == false)) {
     delay(100);
     countertrybutton++;
     Serial.println(countertrybutton);
@@ -61,7 +58,7 @@ void LCD_Config() {
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
       delay(100);
-      if (millis100pressed >= 40) {
+      if (millis100pressed >= 25) {
         buttonpressedlong = true;
       }
       else {
@@ -81,7 +78,57 @@ void LCD_Config() {
       else lcd.print("Stumm");
     }
   }
-  if (buttonpressed == false) {
+  if (buttonpressedlong == false) {
+    return;
+  }
+  buttonpressedlong = false; // Die Variablen wieder zurücksetzen.
+  countertrybutton = 0;
+  millis100pressed = 0;
+  //Menü 2: Hintergrundbeleuchtung
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Displaylicht:"); //Hinweistöne, mit Umlaut als \357 kodiert
+  lcd.setCursor(0, 1);
+  if (I2C_backlight == true) lcd.print("Eingeschaltet");
+  else lcd.print("Ausgeschaltet");
+  Serial.println("Menü: Hintergrundbeleuchtung");
+  while ((countertrybutton <= 200) && (buttonpressedlong == false)) {
+    Serial.println("loop");
+    delay(100);
+    countertrybutton++;
+    Serial.println(countertrybutton);
+    while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+      countertrybutton = 0; //Die Zählervariable wieder auf 0
+      Serial.println("Knopf gedrückt!");
+      millis100pressed++;
+      delay(100);
+      if (millis100pressed >= 25) {
+        buttonpressedlong = true;
+      }
+      else {
+        changevalue = true;
+      }
+    }
+    if ((buttonpressedlong == false) && (changevalue == true)) {
+      changevalue = false;
+      millis100pressed = 0;
+      I2C_backlight = !I2C_backlight;
+      Serial.println("Invertiere I2C_backlight.");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Displaylicht:"); //Hinweistöne, mit Umlaut als \357 kodiert
+      lcd.setCursor(0, 1);
+      if (I2C_backlight == true) {
+        lcd.backlight();
+        lcd.print("Eingeschaltet");
+      }
+      else {
+        lcd.noBacklight(); 
+        lcd.print("Ausgeschaltet");
+      }
+    }
+  }
+  if (buttonpressedlong == false) {
     return;
   }
   buttonpressed = false; // Die Variablen wieder zurücksetzen.
