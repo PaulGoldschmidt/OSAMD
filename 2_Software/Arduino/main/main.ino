@@ -66,12 +66,12 @@ void loop() {
     }
   }
   LED_off();
-  if (percent <= 75) {
+  if (percent <= 65) {
     Serial.println("Damit ist die Luftqualität im grünen Bereich.");
-    //bei 3/4 des Maximalwerts ist die Luftqualität gut
+    //bei 70% des Maximalwerts ist die Luftqualität gut
     digitalWrite(LED_green, LOW); //Damit ist die LED Grün
   }
-  else if ((percent >= 75) && (percent <= 85)) {
+  else if ((percent >= 65) && (percent <= 75)) {
     Serial.println("Damit ist die Luftqualität im gelben Bereich.");
     //jetzt sollte gelüftet werden, damit die LED Gelb
     digitalWrite(LED_green, LOW);
