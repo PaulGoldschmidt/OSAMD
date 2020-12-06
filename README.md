@@ -4,3 +4,5 @@ Deshlab habe ich mich im Rahmen des "[HAW Super Scientist](https://www.hawtech.d
 Eine Anleitung zum Selbstbau dieses Projekts liegt im Ordner "0_Documentation", die Hardwareteile im Ordner "1_Hardware" und die benötigte Software im Ordner "2_Software".
 
 ![Das fertige OSAMD-Projekt](https://github.com/PaulGoldschmidt/OSAMD/blob/main/1_Hardware/Pictures/completed.jpg)
+So wurde übrigens das Gehäuse entwickelt:
+![Das Video des Designprozesses](https://www.youtube.com/watch?v=d4DvKm7_OzI)
