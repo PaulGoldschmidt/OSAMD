@@ -46,3 +46,4 @@ Damit Luft von unten rein kann und das Gehäuse gut steht, werden kleine Füße 
 Mit allen Füßen sieht dass dann so aus:
 ![Das fertige Gehäuse von unten](https://github.com/PaulGoldschmidt/OSAMD/blob/main/1_Hardware/Pictures/done.jpg)
 Dann kann das Projekt eingesteckt werden, und sollte alles wie gewünscht Funktionieren: **Herzlichen Glückwunsch! :tada:**
+![Das fertige Projekt](https://github.com/PaulGoldschmidt/OSAMD/blob/main/1_Hardware/Pictures/completed.jpg)
