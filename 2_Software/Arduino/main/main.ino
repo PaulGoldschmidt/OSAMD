@@ -1,14 +1,14 @@
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal_I2C.h> // LiquidCrystal I2C - Frank de Brabander - Version 1.1.2
 #include <EEPROM.h>
 
 // I2C-Adresse des Display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define lenght 16.0
-double percent;
+double percentDirty;
 
 // Einstellungen für den Betrieb der Sensoreinheit
-#define maximalwert 512 //Die maximal erlaubte Schlecht-Luftqualität (Standart: 512, Maximal: 1024, Grundwert des Sensors bei sehr guter Luft: circa 250)
+#define maximalwert 768 //Die maximal erlaubte Schlecht-Luftqualität (Standard: 512, Maximal: 1024, Grundwert des Sensors bei sehr guter Luft: circa 250)
 
 const byte buzzer = 6; //buzzer to arduino pin 6
 const byte LED_red = 9;
@@ -43,17 +43,17 @@ void setup() {
 }
 
 void loop() {
-  percent = ((float)analogRead(A0) / (float)maximalwert) * 100; // Den Prozentwert des Maximalwertes
-  float prozentwert = 100 - percent; //hier so, dass niedrigere Werte besser sind
+  percentDirty = ((float)analogRead(A0) / (float)maximalwert) * 100; // Den Prozentwert des Maximalwertes
+  float percentClean = 100 - percentDirty; //hier so, dass niedrigere Werte besser sind
   Serial.print("Aktuelle Luftqualität: ");
   Serial.print(analogRead(A0));
   Serial.print(", das entspricht ");
-  Serial.print(prozentwert);
+  Serial.print(percentClean);
   Serial.println(" %. ");
   lcd.setCursor(0, 0);
   lcd.print("Luftqual.: ");
-  lcd.print(prozentwert);
-  LCD_Draw();
+  lcd.print(percentClean);
+  LCD_Draw(percentClean);
   int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
   while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
     Serial.println("Knopf gedrückt!");
@@ -66,12 +66,12 @@ void loop() {
     }
   }
   LED_off();
-  if (percent <= 65) {
+  if (percentDirty <= 65) {
     Serial.println("Damit ist die Luftqualität im grünen Bereich.");
     //bei 70% des Maximalwerts ist die Luftqualität gut
     digitalWrite(LED_green, LOW); //Damit ist die LED Grün
   }
-  else if ((percent >= 65) && (percent <= 75)) {
+  else if ((percentDirty >= 65) && (percentDirty <= 75)) {
     Serial.println("Damit ist die Luftqualität im gelben Bereich.");
     //jetzt sollte gelüftet werden, damit die LED Gelb
     digitalWrite(LED_green, LOW);
@@ -129,8 +129,7 @@ void preheating() { // Die Vorheizschleife
     lcd.print("Vorheizen: ");
     lcd.print(prozentwert);
     lcd.print(" %");
-    percent = prozentwert;
-    LCD_Draw(); // Die Funktion "LCD_Draw" Aufrufen
+    LCD_Draw(prozentwert); // Die Funktion "LCD_Draw" Aufrufen
     while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegeangen
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
