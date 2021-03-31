@@ -23,7 +23,7 @@ Erstmal die Widerstände in die Plätze setzen, dann diese einlöten. Die verble
 Bevor das LCD-Panel und der Sensor eingelötet wird, muss noch der Kontrast vom LCD-Panel richtig eingestellt werden.
 Nachdem noch der Buzzer eingelötet wurde, kann zu den beiden Submodulen gegangen werden: Bei diesen erst die voreingebauten Stiftleisten um 90 Grad drehen, sodass diese in die Vorrichtung auf dem PCB passen. Dann die Messing-Spacer in die Löcher stecken, die Module festschrauben und zu guter letzt die Verbindungen löten. So sieht das Mainboard dann aus:
 ![So sieht das Mainboard dann aus](https://github.com/PaulGoldschmidt/OSAMD/blob/main/1_Hardware/Pictures/pcb_lcd.jpg)
-Und die Unterseite:
+Und die Unterseite (auf dem Bild ist noch ein rotes Jumperkabel zu sehen, dieses ist in der aktuellen Hardwareversion nicht mehr benötigt):
 ![Die Unterseite des PCBs](https://github.com/PaulGoldschmidt/OSAMD/blob/main/1_Hardware/Pictures/pcb_bottom.jpg)
 Bevor nun das Projekt zusammengeschraubt wird, kann dem gesamten Aufbau ein erster Funktionstest unterzogen werden. Dafür einfach das Stromkabel einstecken und auf der anderen Seite in ein USB-Netzteil stecken, dann sollte das folgende passieren:
 Das LCD-Panel geht an, die LED leuchtet grün, blau und dann weiß, bevor sie rot wird und auf dem LCD-Display "Vorwärmen" steht.
