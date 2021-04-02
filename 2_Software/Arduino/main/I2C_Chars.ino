@@ -58,7 +58,7 @@ byte p5[8] = {
 };
 
 void Setup_I2C() {
-  lcd.begin();
+  lcd.init();
   // i2c-Display intialisieren
   lcd.createChar(0, p1);
   lcd.createChar(1, p2);
@@ -72,10 +72,10 @@ void Setup_I2C() {
   else lcd.noBacklight(); 
 }
 
-void LCD_Draw() {
+void LCD_Draw(int value) {
   lcd.setCursor(0, 1);
 
-  double a = lenght / 100 * percent;
+  double a = lenght / 100 * value;
 
   // drawing black rectangles on LCD
 
