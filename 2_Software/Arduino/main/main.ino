@@ -8,6 +8,7 @@
 #define DHTPIN 2
 #define DHTTYPE DHT11 //alternativ je nach verwendetem Sensor: DHT22 (auch (AM2302), AM2321) und DHT21
 DHT dht(DHTPIN, DHTTYPE);
+bool tempinfahrenheit = false; //bei true: Temperatur wird in Fahrenheit ausgegeben!
 #endif
 
 // I2C-Adresse des Display
@@ -27,7 +28,7 @@ const byte MQ135 = A0;
 const byte buttonPin = A6; // the number of the pushbutton pin
 
 bool filpbit = false; // ein Bit was flippt, wenn die rote Stufe erreicht ist. Damit wird die LED zum Blinken gebracht.
-byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der Roten stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
+byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der roten Stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
 bool buzzer_active = true;
 bool I2C_backlight = true;
 
@@ -46,12 +47,28 @@ void setup() {
   pinMode(LED_green, OUTPUT);
   pinMode(LED_blue, OUTPUT);
   LED_off();
+  #ifdef TEMPINSTALLED
+  dht.begin();
+  #endif
   if (buttonvalue() == false) {
     preheating();
   }
 }
 
 void loop() {
+  bool displaytemp = false;
+  #ifdef TEMPINSTALLED //wenn ein Temperatursensor installiert ist, dann wird hier die aktuelle Temperatur ausgelesen.
+  float h = dht.readHumidity();
+  float t = dht.readTemperature(tempinfahrenheit);
+  if (isnan(h) || isnan(t)) {
+    Serial.println(F("Konnte nicht vom Temperatursensor lesen."));
+    return;
+    displaytemp = false;
+  }
+  else {
+    displaytemp = true;
+  }
+  #endif
   percentDirty = ((float)analogRead(A0) / (float)maximalwert) * 100; // Den Prozentwert des Maximalwertes
   float percentClean = 100 - percentDirty; //hier so, dass niedrigere Werte besser sind
   Serial.print("Aktuelle Luftqualität: ");
@@ -59,10 +76,34 @@ void loop() {
   Serial.print(", das entspricht ");
   Serial.print(percentClean);
   Serial.println(" %. ");
-  lcd.setCursor(0, 0);
-  lcd.print("Luftqual.: ");
-  lcd.print(percentClean);
-  LCD_Draw(percentClean);
+  Serial.print("Ein Temperatursensor wurde installiert: ");
+  Serial.println(displaytemp ? "JA" : "NEIN");
+
+  if (displaytemp) { //wenn Temperatur gelesen werden kann, dann dies im seriellen Monitor ausgeben.
+    Serial.print(F("Humidity: "));
+    Serial.print(h);
+    Serial.print(F("%  Temperature: "));
+    Serial.print(t);
+    Serial.print(F("°C "));
+
+    lcd.setCursor(0, 0);
+    lcd.print("Luftqual.: ");
+    lcd.print(percentClean);
+    lcd.setCursor(0, 1);
+    lcd.print("");
+    lcd.print(round(t));
+    lcd.print((char)223);
+    lcd.print("C | "); 
+    lcd.print(round(h));
+    lcd.print("%"); 
+  } 
+  else {
+    lcd.setCursor(0, 0);
+    lcd.print("Luftqual.: ");
+    lcd.print(percentClean);
+    LCD_Draw(percentClean);
+  }
+
   int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
   while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
     Serial.println("Knopf gedrückt!");
@@ -115,6 +156,7 @@ void loop() {
   }
   delay(500);
 }
+
 void preheating() { // Die Vorheizschleife
   bool skipPreheating = false;
   LCD_Startup();
