@@ -57,9 +57,11 @@ void setup() {
 
 void loop() {
   bool displaytemp = false;
+  float h;
+  float t;
   #ifdef TEMPINSTALLED //wenn ein Temperatursensor installiert ist, dann wird hier die aktuelle Temperatur ausgelesen.
-  float h = dht.readHumidity();
-  float t = dht.readTemperature(tempinfahrenheit);
+  h = dht.readHumidity();
+  t = dht.readTemperature(tempinfahrenheit);
   if (isnan(h) || isnan(t)) {
     Serial.println(F("Konnte nicht vom Temperatursensor lesen."));
     return;
@@ -87,16 +89,30 @@ void loop() {
     Serial.print(F("°C "));
 
     lcd.setCursor(0, 0);
-    lcd.print("Luftqual.: ");
-    lcd.print(percentClean);
+    lcd.print("LQ: ");
+    
+    if (percentDirty <= 65) {
+      lcd.print("GUT (");
+    }
+
+    else if ((percentDirty >= 65) && (percentDirty <= 75)) {
+      lcd.print("WARN (");
+    }
+
+    else {
+        lcd.print("L\365FTEN (");
+    }
+    lcd.print(round(percentClean));
+    lcd.print(")");
     lcd.setCursor(0, 1);
-    lcd.print("");
+    lcd.print("T: ");
     lcd.print(round(t));
     lcd.print((char)223);
-    lcd.print("C | "); 
+    lcd.print("C | H: "); 
     lcd.print(round(h));
     lcd.print("%"); 
   } 
+
   else {
     lcd.setCursor(0, 0);
     lcd.print("Luftqual.: ");
@@ -104,7 +120,7 @@ void loop() {
     LCD_Draw(percentClean);
   }
 
-  int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren
+  int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren / zurücksetzen
   while (buttonvalue() == true) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
     Serial.println("Knopf gedrückt!");
     millis100pressed++;
@@ -117,18 +133,17 @@ void loop() {
   }
   LED_off();
   if (percentDirty <= 65) {
-    Serial.println("Damit ist die Luftqualität im grünen Bereich.");
-    //bei 70% des Maximalwerts ist die Luftqualität gut
+    //bis 70% des Maximalwerts ist die Luftqualität gut
     digitalWrite(LED_green, LOW); //Damit ist die LED Grün
+    Serial.println("Damit ist die Luftqualität im grünen Bereich.");
   }
   else if ((percentDirty >= 65) && (percentDirty <= 75)) {
-    Serial.println("Damit ist die Luftqualität im gelben Bereich.");
     //jetzt sollte gelüftet werden, damit die LED Gelb
     digitalWrite(LED_green, LOW);
     digitalWrite(LED_red, LOW);
+    Serial.println("Damit ist die Luftqualität im gelben Bereich.");
   }
   else {
-    Serial.println("Damit ist die Luftqualität im roten Bereich.");
     //die Luftqualität ist sehr schlecht, es sollte dringend gelüftet werden!
     if (filpbit == false) { //mit diesen Bedingungen binkt die LED
       digitalWrite(LED_red, LOW); //LED Rot
@@ -153,6 +168,7 @@ void loop() {
       counter_buzzeralarm = 0;
     }
     else counter_buzzeralarm++; //sonst hochzählen
+    Serial.println("Damit ist die Luftqualität im roten Bereich.");
   }
   delay(500);
 }
@@ -185,7 +201,7 @@ void preheating() { // Die Vorheizschleife
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
       delay(100);
-      if (millis100pressed >= 40) {
+      if (millis100pressed >= 30) {
         Serial.println("Knopf 4 Sekunden am Stück gedrückt, überspringe Vorwärmen.");
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -194,7 +210,7 @@ void preheating() { // Die Vorheizschleife
         lcd.print("Vorheizen!");
         digitalWrite(LED_red, HIGH); //Die auf Grün umschalten
         digitalWrite(LED_green, LOW);
-        delay(3000);
+        delay(1500);
         skipPreheating = true;
         break;
       }

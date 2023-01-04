@@ -22,7 +22,7 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
   lcd.setCursor(0, 0);
   lcd.print("\365berspringen:"); //Überspringen mit \365 als Ü kodiertem Charakter
   lcd.setCursor(0, 1);
-  lcd.print("5 Sek. Dr\365cken"); // Drücken
+  lcd.print("3 Sek. Dr\365cken"); // Drücken
   delay(3500);
 }
 
