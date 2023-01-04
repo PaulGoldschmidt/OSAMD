@@ -5,7 +5,7 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
   lcd.setCursor(2, 0);
   lcd.print("Starte OSAMD");
   lcd.setCursor(4, 1);
-  lcd.print("V. 1.00A");
+  lcd.print("V. 1.2A");
   delay(2500);
   digitalWrite(LED_green, HIGH);
   digitalWrite(LED_blue, LOW);

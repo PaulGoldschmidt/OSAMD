@@ -75,7 +75,7 @@ void Setup_I2C() {
 void LCD_Draw(int value) {
   lcd.setCursor(0, 1);
 
-  double a = lenght / 100 * value;
+  double a = lengh / 100 * value;
 
   // drawing black rectangles on LCD
 
@@ -122,7 +122,7 @@ void LCD_Draw(int value) {
   }
 
   //clearing line
-  for (int i = 0; i < (lenght - b); i++) {
+  for (int i = 0; i < (lengh - b); i++) {
 
     lcd.print(" ");
   }

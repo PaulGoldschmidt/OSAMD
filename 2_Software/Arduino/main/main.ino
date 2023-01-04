@@ -1,14 +1,23 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h> // LiquidCrystal I2C - Frank de Brabander - Version 1.1.2
 #include <EEPROM.h>
+#define TEMPINSTALLED // auskommentieren, wenn kein DHT-Temperatursensor verwendet wird.
+
+#ifdef TEMPINSTALLED
+#include <DHT.h>
+#define DHTPIN 2
+#define DHTTYPE DHT11 //alternativ je nach verwendetem Sensor: DHT22 (auch (AM2302), AM2321) und DHT21
+DHT dht(DHTPIN, DHTTYPE);
+#endif
 
 // I2C-Adresse des Display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-#define lenght 16.0
+#define lengh 16.0
 double percentDirty;
 
 // Einstellungen für den Betrieb der Sensoreinheit
 #define maximalwert 768 //Die maximal erlaubte Schlecht-Luftqualität (Standard: 512, Maximal: 1024, Grundwert des Sensors bei sehr guter Luft: circa 250)
+//TODO: Aktive Kalibration des Sensors
 
 const byte buzzer = 6; //buzzer to arduino pin 6
 const byte LED_red = 9;
