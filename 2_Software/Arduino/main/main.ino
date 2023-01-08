@@ -64,7 +64,6 @@ void loop() {
   t = dht.readTemperature(tempinfahrenheit);
   if (isnan(h) || isnan(t)) {
     Serial.println(F("Konnte nicht vom Temperatursensor lesen."));
-    return;
     displaytemp = false;
   }
   else {
