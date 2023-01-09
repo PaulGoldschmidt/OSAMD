@@ -6,4 +6,5 @@ Deshalb habe ich mich dafür entschlossen, ein Luftqualitätsmessgerät zu entwi
 Eine Anleitung zum Selbstbau dieses Projekts liegt im Ordner "0_Documentation", die Hardwareteile im Ordner "1_Hardware" und die benötigte Software im Ordner "2_Software".
 
 ![Das fertige OSAMD-Projekt](/1_Hardware/Pictures/completed.jpg)
+
 [So wurde übrigens das Gehäuse designed](https://www.youtube.com/watch?v=d4DvKm7_OzI)
