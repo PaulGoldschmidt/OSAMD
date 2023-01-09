@@ -5,5 +5,5 @@ Hohe Luftqualität ist wichtig. Eigentlich schon immer, denn in besserer Luft ka
 Deshalb habe ich mich dafür entschlossen, ein Luftqualitätsmessgerät zu entwickeln, welches mit niedrigen Teilkosten (circa 7-10 Euro/Einheit) die Luft in Klassenzimmern überwachen kann und eine Warnung abgibt, wenn die Luftqualität kritisch schlecht ist. Der Name dieses Projekts, OSAMD, steht für "Open-Source Air-Monitoring Device", also eine quelloffene Lösung zur Überwachung der Luftqualität.
 Eine Anleitung zum Selbstbau dieses Projekts liegt im Ordner "0_Documentation", die Hardwareteile im Ordner "1_Hardware" und die benötigte Software im Ordner "2_Software".
 
-![Das fertige OSAMD-Projekt](../1_Hardware/Pictures/completed.jpg)
+![Das fertige OSAMD-Projekt](/1_Hardware/Pictures/completed.jpg)
 [So wurde übrigens das Gehäuse designed](https://www.youtube.com/watch?v=d4DvKm7_OzI)
