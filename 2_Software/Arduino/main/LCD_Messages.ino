@@ -133,8 +133,59 @@ void LCD_Config() {
   if (buttonpressedlong == false) {
     return;
   }
+buttonpressedlong = false; // Die Variablen wieder zurücksetzen.
+  countertrybutton = 0;
+  millis100pressed = 0;
+  //Menü 3: Kalibration
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Kalibration:"); //Hinweistöne, mit Umlaut als \357 kodiert
+  lcd.setCursor(0, 1);
+  if (I2C_backlight == true) lcd.print("Ja");
+  else lcd.print("Nein");
+  Serial.println("Menü: Kalibration");
+  while ((countertrybutton <= 200) && (buttonpressedlong == false)) {
+    Serial.println("loop");
+    delay(100);
+    countertrybutton++;
+    Serial.println(countertrybutton);
+    while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+      countertrybutton = 0; //Die Zählervariable wieder auf 0
+      Serial.println("Knopf gedrückt!");
+      millis100pressed++;
+      delay(100);
+      if (millis100pressed >= 25) {
+        buttonpressedlong = true;
+      }
+      else {
+        changevalue = true;
+      }
+    }
+    if ((buttonpressedlong == false) && (changevalue == true)) {
+      changevalue = false;
+      millis100pressed = 0;
+      calibration_tasked = !calibration_tasked;
+      Serial.println("Invertiere calibration_tasked.");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Kalibration:"); //Hinweistöne, mit Umlaut als \357 kodiert
+      lcd.setCursor(0, 1);
+      if (calibration_tasked == true) {
+        lcd.backlight();
+        lcd.print("Eingeschaltet");
+      }
+      else {
+        lcd.noBacklight();
+        lcd.print("Ausgeschaltet");
+      }
+    }
+  }
+  if (buttonpressedlong == false) {
+    return;
+  }
   buttonpressed = false; // Die Variablen wieder zurücksetzen.
   countertrybutton = 0;
   EEPROM.write(0, buzzer_active);
   EEPROM.write(1, I2C_backlight);
+  EEPROM.write(2, calibration_tasked);
 }

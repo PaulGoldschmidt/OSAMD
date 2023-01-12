@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h> // LiquidCrystal I2C - Frank de Brabander - Version 1.1.2
 #include <EEPROM.h>
+#include <MQUnifiedsensor.h>
 #define TEMPINSTALLED // auskommentieren, wenn kein DHT-Temperatursensor verwendet wird.
 
 #ifdef TEMPINSTALLED
@@ -11,6 +12,14 @@ DHT dht(DHTPIN, DHTTYPE);
 bool tempinfahrenheit = false; //bei true: Temperatur wird in Fahrenheit ausgegeben!
 #endif
 
+//Definitions for MQ135 Sensor
+#define placa "Arduino NANO"
+#define Voltage_Resolution 5
+#define pin A0 //Analog input 0 of your arduino
+#define type "MQ-135" //MQ135
+#define ADC_Bit_Resolution 10 // For arduino UNO/MEGA/NANO
+#define RatioMQ135CleanAir 3.6//RS / R0 = 3.6 ppm  
+
 // I2C-Adresse des Display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define lengh 16.0
@@ -20,28 +29,40 @@ double percentDirty;
 #define maximalwert 768 //Die maximal erlaubte Schlecht-Luftqualität (Standard: 512, Maximal: 1024, Grundwert des Sensors bei sehr guter Luft: circa 250)
 //TODO: Aktive Kalibration des Sensors
 
-const byte buzzer = 6; //buzzer to arduino pin 6
+const byte buzzer = 6;
 const byte LED_red = 9;
 const byte LED_blue = 10;
 const byte LED_green = 11;
-const byte MQ135 = A0;
-const byte buttonPin = A6; // the number of the pushbutton pin
+const byte buttonPin = A6;
+
+float calcR0 = 0;
 
 bool filpbit = false; // ein Bit was flippt, wenn die rote Stufe erreicht ist. Damit wird die LED zum Blinken gebracht.
 byte counter_buzzeralarm = 0; // ein Byte welches hochgezählt wird, damit bei der roten Stufe einmal Pro minute der Buzzer piepst (wenn aktiviert)
 bool buzzer_active = true;
 bool I2C_backlight = true;
+bool calibration_tasked = false;
+
+//Declare Sensor
+MQUnifiedsensor MQ135(placa, Voltage_Resolution, ADC_Bit_Resolution, pin, type);
 
 void setup() {
   // Serielle Kommunikation zum PC über 9600 baud/sekunde:
   Serial.begin(9600);
   buzzer_active = EEPROM.read(0); //Lese aus den nichtflüchtigen Speicher die Konfigurationsvariablen
   I2C_backlight = EEPROM.read(1);
+  calibration_tasked = EEPROM.read(2);
+  EEPROM.get(3, calcR0);
+  if (isnan(calcR0)) sensorcalibration();
   Setup_I2C();
-  Serial.print("Gelesen aus dem EEPROM: Benachrichtigungstöne: ");
+  Serial.print(F("Gelesen aus dem EEPROM: Benachrichtigungstöne: "));
   Serial.print(buzzer_active ? "EIN" : "AUS");
-  Serial.print(" | Hintergrundbeleuchtung des Displays: ");
-  Serial.println(I2C_backlight ? "EIN" : "AUS");
+  Serial.print(F(" | Hintergrundbeleuchtung des Displays: "));
+  Serial.print(I2C_backlight ? "EIN" : "AUS");
+  Serial.print(F(" | Kalibration Benötigt: "));
+  Serial.print(calibration_tasked ? "JA" : "NEIN");
+  Serial.print(F(" | MQ135-Kalibrationswert: "));
+  Serial.println(calcR0);
   pinMode(buzzer, OUTPUT); // Die folgenden Pins als Ausgang initalisieren:
   pinMode(LED_red, OUTPUT);
   pinMode(LED_green, OUTPUT);
@@ -50,6 +71,10 @@ void setup() {
   #ifdef TEMPINSTALLED
   dht.begin();
   #endif
+  //Set math model to calculate the PPM concentration and the value of constants
+  MQ135.setRegressionMethod(1); //_PPM =  a*ratio^b
+  MQ135.setA(102.2); MQ135.setB(-2.473); // Configure the equation to to calculate NH4 concentration
+  MQ135.init(); 
   if (buttonvalue() == false) {
     preheating();
   }
@@ -59,6 +84,7 @@ void loop() {
   bool displaytemp = false;
   float h;
   float t;
+  float cFactor = 0;
   #ifdef TEMPINSTALLED //wenn ein Temperatursensor installiert ist, dann wird hier die aktuelle Temperatur ausgelesen.
   h = dht.readHumidity();
   t = dht.readTemperature(tempinfahrenheit);
@@ -70,13 +96,18 @@ void loop() {
     displaytemp = true;
   }
   #endif
-  percentDirty = ((float)analogRead(A0) / (float)maximalwert) * 100; // Den Prozentwert des Maximalwertes
-  float percentClean = 100 - percentDirty; //hier so, dass niedrigere Werte besser sind
+  MQ135.update();
+  float air_quality = MQ135.readSensor(false, cFactor);
+  MQ135.serialDebug();
+  const int maxCO2e = 2500; // minimale CO2e-Konzentration in der Luft für 0% Luftqualität
+  const int LevelGreenCO2e = 1000; // bis 1000 ppm ist alles im grünen Bereich
+  const int LevelYellowCO2e = 1400; // bis 1400 ppm gelber bereich (und alles darüber rot)
+  float air_quality_percent = (air_quality / maxCO2e) * 100;
   Serial.print("Aktuelle Luftqualität: ");
-  Serial.print(analogRead(A0));
+  Serial.print(analogRead(pin));
   Serial.print(", das entspricht ");
-  Serial.print(percentClean);
-  Serial.println(" %. ");
+  Serial.print(air_quality);
+  Serial.println(" PPM CO2e. ");
   Serial.print("Ein Temperatursensor wurde installiert: ");
   Serial.println(displaytemp ? "JA" : "NEIN");
 
@@ -90,19 +121,19 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print("LQ: ");
     
-    if (percentDirty <= 65) {
-      lcd.print("GUT (");
+    if (air_quality <= 1000) {
+      lcd.print("");
     }
 
-    else if ((percentDirty >= 65) && (percentDirty <= 75)) {
-      lcd.print("WARN (");
+    else if ((air_quality >= 1000) && (air_quality <= 2000)) {
+      lcd.print("");
     }
 
     else {
-        lcd.print("L\365FTEN (");
+        lcd.print("");
     }
-    lcd.print(round(percentClean));
-    lcd.print(")");
+    lcd.print(round(air_quality));
+    lcd.print(" ppm-e");
     lcd.setCursor(0, 1);
     lcd.print("T: ");
     lcd.print(round(t));
@@ -114,9 +145,9 @@ void loop() {
 
   else {
     lcd.setCursor(0, 0);
-    lcd.print("Luftqual.: ");
-    lcd.print(percentClean);
-    LCD_Draw(percentClean);
+    lcd.print("CO2-e: ");
+    lcd.print(air_quality);
+    LCD_Draw(air_quality);
   }
 
   int millis100pressed = 0; // Zählervariable für Knopfdruck initalisieren / zurücksetzen
@@ -131,16 +162,22 @@ void loop() {
     }
   }
   LED_off();
-  if (percentDirty <= 65) {
-    //bis 70% des Maximalwerts ist die Luftqualität gut
+  byte LevelGreenPercent = (LevelGreenCO2e/maxCO2e) * 100;
+  byte LevelYellowPercent = (LevelYellowCO2e/maxCO2e) * 100;
+  if (percentDirty <= LevelGreenPercent) { // bis 1000 ppm bei 2500 ppm Maximalmaß
+    //bis 60% des Maximalwerts ist die Luftqualität gut
     digitalWrite(LED_green, LOW); //Damit ist die LED Grün
-    Serial.println("Damit ist die Luftqualität im grünen Bereich.");
+    Serial.print("Damit ist die Luftqualität im grünen Bereich, da nicht mehr als ");
+    Serial.print(LevelGreenPercent);
+    Serial.println("ppm in der Luft sind.");
   }
-  else if ((percentDirty >= 65) && (percentDirty <= 75)) {
+  else if ((percentDirty >= LevelGreenPercent) && (percentDirty <= LevelYellowPercent)) {
     //jetzt sollte gelüftet werden, damit die LED Gelb
     digitalWrite(LED_green, LOW);
     digitalWrite(LED_red, LOW);
-    Serial.println("Damit ist die Luftqualität im gelben Bereich.");
+    Serial.print("Damit ist die Luftqualität im gelben Bereich, da nicht mehr als ");
+    Serial.print(LevelYellowPercent);
+    Serial.println("ppm in der Luft sind.");
   }
   else {
     //die Luftqualität ist sehr schlecht, es sollte dringend gelüftet werden!
