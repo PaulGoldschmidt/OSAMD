@@ -5,7 +5,7 @@ void LCD_Startup() { //Die LED-Startup-Anzeige
   lcd.setCursor(2, 0);
   lcd.print("Starte OSAMD");
   lcd.setCursor(4, 1);
-  lcd.print("V. 1.2A");
+  lcd.print(OSAMD_VERSION);
   delay(2500);
   digitalWrite(LED_green, HIGH);
   digitalWrite(LED_blue, LOW);
@@ -55,7 +55,7 @@ void LCD_Config() {
     delay(100);
     countertrybutton++;
     Serial.println(countertrybutton);
-    while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+    while (is_button_pressed() && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
       countertrybutton = 0; //Die Zählervariable wieder auf 0
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
@@ -99,7 +99,7 @@ void LCD_Config() {
     delay(100);
     countertrybutton++;
     Serial.println(countertrybutton);
-    while ((buttonvalue() == true) && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
+    while (is_button_pressed() && (buttonpressedlong == false)) { //Wenn der Button gedrückt ist, wird in diese Funktion gegangen
       countertrybutton = 0; //Die Zählervariable wieder auf 0
       Serial.println("Knopf gedrückt!");
       millis100pressed++;
