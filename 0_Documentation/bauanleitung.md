@@ -53,7 +53,7 @@ Als nächstes wird dass alles verschraubt:
 ![Und die Schrauben rein!](../1_Hardware/Pictures/screwing.jpg)
 Dann sieht das von unten so aus:
 ![Die Sicht von unten](../1_Hardware/Pictures/fullyassembled.jpg)
-Damit Luft von unten rein kann und das Gehäuse gut steht, werden kleine Füße an das Gehäuse geklebt (und auch über die Schrauben
+Damit Luft von unten rein kann und das Gehäuse gut steht, werden kleine Füße an das Gehäuse geklebt (und auch über die Schrauben)
 ![Füße über die Schrauben](../1_Hardware/Pictures/foot.jpg)
 Mit allen Füßen sieht dass dann so aus:
 ![Das fertige Gehäuse von unten](../1_Hardware/Pictures/done.jpg)
