@@ -46,7 +46,7 @@ void s72::Config::set_buzzer_enabled(bool const state) {
   this->buzzer_enabled = state;
 }
 
-bool s72::Config::set_backlight_enabled(bool const state) {
+void s72::Config::set_backlight_enabled(bool const state) {
   Serial.print(F("Config set_backlight_enabled "));
   Serial.println(state);
   this->backlight_enabled = state;

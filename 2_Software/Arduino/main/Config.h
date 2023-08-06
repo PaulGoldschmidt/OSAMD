@@ -146,7 +146,7 @@ public:
   void toggle_buzzer_enabled();
   void toggle_backlight_enabled();
   void set_buzzer_enabled(bool const state);
-  bool set_backlight_enabled(bool const state);
+  void set_backlight_enabled(bool const state);
   void const save();
   void setup();
 };
