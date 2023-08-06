@@ -105,8 +105,22 @@ void s72::LED::set_color_white() {
   set_color(true, true, true);
 }
 
+void s72::LED::set_enabled(bool const state) {
+  if (state == this->enabled) return;
+
+  this->enabled = state;
+  if (this->enabled) {
+    on();
+  } else {
+    off();
+  }
+  
+}
+
 void s72::LED::on(){
-  set(this->red, this->green, this->blue);
+  if (this->enabled) {
+    set(this->red, this->green, this->blue);
+  }
 }
 
 void s72::LED::off(){

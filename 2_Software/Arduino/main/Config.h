@@ -107,7 +107,7 @@ unsigned long const LONG_KEYPRESS_MS = 1000; // Tastendruck wird als langer Tast
   const byte BUTTON_PIN = A6;
   const bool BUTTON_PIN_IS_ANALOG = true;
   const unsigned int DEBOUNCE_DELAY_MS = 50;
-  const boolean HIGH_MEANS_PRESSED = false;
+  const bool HIGH_MEANS_PRESSED = false;
 
   const byte DHT_PIN = 2;
 #endif
@@ -132,22 +132,28 @@ class Config
 private:
   bool buzzer_enabled = true;
   bool backlight_enabled = true;
+  bool led_enabled = true;
 
 public:
-  static const unsigned char TRUE_VALUE = 1;
-  static const unsigned char FALSE_VALUE = 0;
-  static const unsigned int EEPROM_BUZZER = 2;
-  static const unsigned int EEPROM_BACKLIGHT = 1;
-  static const unsigned int EEPROM_INIT_DONE = 0;
-  static const char FLAG_INIT_DONE = 'O';
+  static byte const TRUE_VALUE = 1;
+  static byte const FALSE_VALUE = 0;
+  static unsigned int const EEPROM_INIT_DONE = 0;
+  static unsigned int const EEPROM_BACKLIGHT = 1;
+  static unsigned int const EEPROM_BUZZER = 2;
+  static unsigned int const EEPROM_LED = 3;
+  static unsigned char const EEPROM_SIZE = 4;
+  static char const FLAG_INIT_DONE = 'O';
 
-  bool const is_buzzer_enabled();
-  bool const is_backlight_enabled();
+  bool is_buzzer_enabled() const;
+  bool is_backlight_enabled() const;
+  bool is_led_enabled() const;
   void toggle_buzzer_enabled();
   void toggle_backlight_enabled();
+  void toggle_led_enabled();
   void set_buzzer_enabled(bool const state);
   void set_backlight_enabled(bool const state);
-  void const save();
+  void set_led_enabled(bool const state);
+  void save() const;
   void setup();
 };
 

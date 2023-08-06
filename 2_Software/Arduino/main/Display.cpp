@@ -1,27 +1,14 @@
 #include "Display.h"
 #include "Config.h"
 
-unsigned char const GLYPH_FULL = 0;
-unsigned char const GLYPH_ONE_FIFTH = 1;
-unsigned char const GLYPH_TWO_FIFTH = 2;
-unsigned char const GLYPH_THREE_FIFTH = 3;
-unsigned char const GLYPH_FOUR_FIFTH = 4;
-
-unsigned char const ONE_FIFTH = 0x10;
-unsigned char const TWO_FIFTH = 0x18;
-unsigned char const THREE_FIFTH = 0x1C;
-unsigned char const FOUR_FIFTH = 0x1E;
-unsigned char const FULL = 0x1F;
-
-unsigned char const CHAR_WIDTH_IN_PIXEL = 5;
-
 
 s72::Display::Display(byte const i2c_address, byte const width, byte const height) : width(width), height(height), lcd(LiquidCrystal_I2C(i2c_address, width, height)) {
 }
 
 
 
-void create_glyph(LiquidCrystal_I2C &lcd, unsigned char const number, unsigned char const value) {
+// Zeichen des LCD selbst definieren (wird für den "Fortschrittsbalken" benötigt)
+void s72::Display::create_glyph(byte const number, byte const value) {
   byte char_definition[8];
   for (int i = 0; i < 8; i++) {
     char_definition[i] = value;
@@ -31,19 +18,20 @@ void create_glyph(LiquidCrystal_I2C &lcd, unsigned char const number, unsigned c
 
 
 
-void s72::Display::draw_progress_bar(unsigned char percent_value) {
+// 
+void s72::Display::draw_progress_bar(byte const percent_value) {
   draw_progress_bar(percent_value, 1);
 }
 
 
 
-void s72::Display::draw_progress_bar(unsigned char percent_value, unsigned char row) {
+void s72::Display::draw_progress_bar(byte percent_value, byte const row) {
 
   if (percent_value > 100) percent_value = 100;
   lcd.setCursor(0, row);
 
   // Breite des Fortschrittsbalkens in Pixeln berechnen
-  unsigned int fill_width_pixel = (this->width * CHAR_WIDTH_IN_PIXEL * percent_value) / 100;
+  const unsigned int fill_width_pixel = (this->width * CHAR_WIDTH_IN_PIXEL * percent_value) / 100;
 
   // Anzahl der ganz ausgefüllten Zeichen berechnen und darstellen
   byte char_count = fill_width_pixel / CHAR_WIDTH_IN_PIXEL;
@@ -58,7 +46,7 @@ void s72::Display::draw_progress_bar(unsigned char percent_value, unsigned char 
     char_count++;
   }
 
-  // Rest der Zeile mit Leerzeichen füllen
+  // Rest der Zeile mit Leerzeichen füllen, um ggf. dort noch stehende Zeichen zu überschreiben
   for (int i = 0; i < (this->width - char_count); i++) {
     lcd.print(F(" "));
   }
@@ -66,31 +54,31 @@ void s72::Display::draw_progress_bar(unsigned char percent_value, unsigned char 
 
 
 
+// Hardware und Zustand des Displays initialisieren
 void s72::Display::setup(s72::Config &config, s72::LED &led, s72::Buzzer &buzzer, s72::MQ135Reader &mq135reader) {
-
   this->config = &config;
   this->led = &led;
   this->buzzer = &buzzer;
   this->mq135reader = &mq135reader;
 
-  // Hardware initialisieren
+  // Displayhardware initialisieren
   lcd.init();
+
+  // im EEPROM gespeicherte Konfiguration wiederherstellen
   if (this->config->is_backlight_enabled()) {
     lcd.backlight();
   } else {
     lcd.noBacklight();
   }
-
-  if (! this->config->is_buzzer_enabled()) {
-    this->buzzer->setSilent(true);
-  } 
+  this->buzzer->setSilent(!this->config->is_buzzer_enabled());
+  this->led->set_enabled(this->config->is_led_enabled());
   
   // Spezielle Zeichen für den Fortschrittsbalken definieren, ein Zeichen ist fünf Pixel breit
-  create_glyph(lcd, GLYPH_FULL, FULL);
-  create_glyph(lcd, GLYPH_ONE_FIFTH, ONE_FIFTH);
-  create_glyph(lcd, GLYPH_TWO_FIFTH, TWO_FIFTH);
-  create_glyph(lcd, GLYPH_THREE_FIFTH, THREE_FIFTH);
-  create_glyph(lcd, GLYPH_FOUR_FIFTH, FOUR_FIFTH);
+  create_glyph(GLYPH_FULL, FULL);
+  create_glyph(GLYPH_ONE_FIFTH, ONE_FIFTH);
+  create_glyph(GLYPH_TWO_FIFTH, TWO_FIFTH);
+  create_glyph(GLYPH_THREE_FIFTH, THREE_FIFTH);
+  create_glyph(GLYPH_FOUR_FIFTH, FOUR_FIFTH);
 
   // Startnachricht anzeigen
   current_state = s72::DisplayState::ShowStartScreen;
@@ -114,7 +102,6 @@ void s72::Display::setup(s72::Config &config, s72::LED &led, s72::Buzzer &buzzer
 }
 
 
-
 void s72::Display::update() {
 
   DisplayState next_state = this->current_state;
@@ -125,7 +112,7 @@ void s72::Display::update() {
     case s72::DisplayState::ShowStartScreen:
     {
       unsigned long duration = millis() - this->current_state_start_time;
-      if (duration > s72::Display::START_SCREEN_DURATION_MS) {
+      if (duration > START_SCREEN_DURATION_MS) {
         next_state = s72::DisplayState::ShowPreheat;
       }
       break;
@@ -185,6 +172,7 @@ void s72::Display::update() {
         this->buzzer->keysound(440, 300);
         this->led->set_color_blue();
         this->led->set_on();
+        lcd.backlight(); // Display beleuchten, damit das Menü zu sehen ist
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print(F("Hinweist\357ne:")); //Hinweistöne, mit Umlaut als \357 kodiert
@@ -226,12 +214,42 @@ void s72::Display::update() {
       check_menu_timeout = true;
       break;
     }
+    case s72::DisplayState::ShowConfigLED:
+    {
+      // nach dem Wechsel einmal den Info-Text zur Displaybeleuchtung anzeigen
+      bool show_all = (this->prev_state != this->current_state);
+      if (show_all) {
+        Serial.println(F("Display::update ShowConfigLED: show_all"));
+        this->buzzer->keysound(440, 300);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(F("Status-LED:"));
+      }
+      if (show_all || update_led_option) { // update_led_option wird in onEvent(ButtonReleaseEvent) gesetzt
+        if (update_led_option) {
+          // Bestätigungston für Änderung
+          this->buzzer->keysound(880, 600);
+          Serial.println(F("Display::update ShowConfigLED: update_led_option"));
+        }
+        lcd.setCursor(0, 1);
+        lcd.print(this->config->is_led_enabled() ? F("ein") : F("aus"));
+        update_led_option = false;
+      }
+      check_menu_timeout = true;
+      break;
+    }
   }
 
   if (check_menu_timeout) {
     unsigned long duration = millis() - this->current_state_start_time;
-      if (duration > s72::Display::CONFIG_TIMEOUT_MS) {
+      if (duration > CONFIG_TIMEOUT_MS) {
         next_state = s72::DisplayState::InitShowReadings;
+        // Displaybeleuchtung ggf. wieder ausschalten
+        if (this->config->is_backlight_enabled()) {
+          lcd.backlight();
+        } else {
+          lcd.noBacklight();
+        }
         Serial.println(F("Display::update timeout in menu"));
       }
   }
@@ -293,7 +311,7 @@ void s72::Display::displayHumTemp(float const temp, float const hum) {
     lcd.print(F("."));
     lcd.print(centi_degrees);
   }
-  lcd.write(s72::Display::GLYPH_DEGREE);
+  lcd.write(GLYPH_DEGREE);
   lcd.print(F("C, H:"));
   if (isnan(hum)) {
     lcd.print(F("--"));
@@ -302,6 +320,7 @@ void s72::Display::displayHumTemp(float const temp, float const hum) {
   }
   lcd.print(F("%"));
 }
+
 
 
 void s72::Display::displayPpm(float const ppm) {
@@ -348,20 +367,32 @@ void s72::Display::displayPpm(float const ppm) {
 }
 
 
+
 // MQ135Listener
 void s72::Display::onEvent(MQ135Event &event) {
   this->cached_ppm = event.ppm;
-  displayPpm(this->cached_ppm);
 #ifdef DEBUG
   Serial.print(F("Display: MQ135Event received, ppm: "));
   Serial.println(this->cached_ppm);
+#endif
+
+  if (this->current_state != s72::DisplayState::ShowReadings) {
+#ifdef DEBUG
+    Serial.println(F("  values cached"));
+#endif
+    return;
+  }
+  displayPpm(this->cached_ppm);
+
+#ifdef DEBUG
   Serial.println(F("  value sent to lcd"));
   Serial.println(F("Display: MQ135Event done"));
 #endif
 }
 
-// DHTListener
 
+
+// DHTListener
 void s72::Display::onEvent(s72::DHTEvent &event) {
 #ifdef DEBUG
   Serial.print(F("Display: DHTEvent received, T: "));
@@ -387,8 +418,10 @@ void s72::Display::onEvent(s72::DHTEvent &event) {
 }
 
 
+
 // ButtonReleaseListener
 
+// je nach Zustand reagieren, wenn der Taster betätigt wurde
 void s72::Display::onEvent(ButtonReleaseEvent &event) {
   bool is_long_press = event.pressed_duration >= LONG_KEYPRESS_MS;
 
@@ -399,7 +432,7 @@ void s72::Display::onEvent(ButtonReleaseEvent &event) {
   Serial.print("  is_long: ");
   Serial.println(is_long_press);
 
-  Serial.print(F("  in Status "));
+  Serial.print(F("  in status "));
   switch (this->current_state)
   {
     case s72::DisplayState::ShowStartScreen:
@@ -417,8 +450,10 @@ void s72::Display::onEvent(ButtonReleaseEvent &event) {
     case s72::DisplayState::ShowConfigBacklight:
       Serial.println(F("ShowConfigBacklight"));
       break;
+    case s72::DisplayState::ShowConfigLED:
+      Serial.println(F("ShowConfigLED"));
+      break;
   }
-
 #endif
 
   switch (this->current_state)
@@ -479,6 +514,20 @@ void s72::Display::onEvent(ButtonReleaseEvent &event) {
         }
         this->update_backlight_option = true;
       } else {
+        Serial.println(F("  skip to ShowConfigLED"));
+        switchToState(s72::DisplayState::ShowConfigLED);
+      }
+      break;
+    }
+
+    case s72::DisplayState::ShowConfigLED:
+    {
+      if (is_long_press) {
+        Serial.println(F("  toggle is_led_enabled"));
+        this->config->toggle_led_enabled();
+        this->led->set_enabled(this->config->is_led_enabled());
+        this->update_led_option = true;
+      } else {
         Serial.println(F("  save config to EEPROM"));
         this->config->save();
         Serial.println(F("  skip to InitShowReadings"));
@@ -486,7 +535,6 @@ void s72::Display::onEvent(ButtonReleaseEvent &event) {
       }
       break;
     }
-
 
     default:
     {

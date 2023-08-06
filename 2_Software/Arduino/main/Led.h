@@ -25,6 +25,7 @@ private:
   unsigned long durationOffMs = 500;
   unsigned int repetitions;
   bool infinite_blink = true;
+  bool enabled = true; // nur wenn true wird die LED tatsächlich eingeschaltet
 
   bool red = false;
   bool green = false;
@@ -61,6 +62,7 @@ public:
   void set_color_yellow();
   void set_color_blue();
   void set_color_white();
+  void set_enabled(bool const state);
 
   void setup();
   void update();
