@@ -150,8 +150,14 @@ void s72::Display::update() {
     }
     case s72::DisplayState::InitShowReadings:
     {
-      // einmalig zwischengespeicherte Werte darstellen
       Serial.println(F("Display::update InitShowReadings (show cached values)"));
+      // Beleuchtung war ggf. im Menü aktiviert -> gewünschten Zustand wiederherstellen
+      if (this->config->is_backlight_enabled()) {
+        lcd.backlight();
+      } else {
+        lcd.noBacklight();
+      }
+      // einmalig zwischengespeicherte Werte darstellen
       lcd.clear();
       displayPpm(this->cached_ppm);
       if (this->cached_hum > -1.0) displayHumTemp(this->cached_temp, this->cached_hum);
@@ -398,7 +404,7 @@ void s72::Display::onEvent(s72::DHTEvent &event) {
   Serial.print(F("Display: DHTEvent received, T: "));
   Serial.print(event.temperature);
   Serial.print(" H: ");
-  Serial.println(event.temperature);
+  Serial.println(event.humidity);
 #endif
 
   if (!isnan(event.temperature)) this->cached_temp = event.temperature;
@@ -507,11 +513,6 @@ void s72::Display::onEvent(ButtonReleaseEvent &event) {
       if (is_long_press) {
         Serial.println(F("  toggle is_backlight_enabled"));
         this->config->toggle_backlight_enabled();
-        if (this->config->is_backlight_enabled()) {
-          lcd.backlight();
-        } else {
-          lcd.noBacklight();
-        }
         this->update_backlight_option = true;
       } else {
         Serial.println(F("  skip to ShowConfigLED"));

@@ -54,7 +54,7 @@ bool differs(float const val1, float const val2, float const epsilon) {
 void s72::DHTReader::update(){
 // die Methode bleibt leer, wenn kein DHT verbaut ist
 #ifdef DHTTYPE
-  // DHTs mögen nicht zu häufig abgefragt werden
+  // DHTs mögen nicht zu häufig abgefragt werden -> nichts machen, wenn die letzte Abfrage noch nicht lange genug her ist
   unsigned long now = millis();
   if ((this->lastReadTime > 0) && ((now - this->lastReadTime) < this->readDelayMs)) return;
   
@@ -73,7 +73,7 @@ void s72::DHTReader::update(){
   // hat sich mindestens einer der beiden Werte signifikant verändert?
   bool const significant_difference = differs(h, this->prev_humidity, MIN_HUMIDITY_DIFF_FOR_EVENT) || differs(t, this->prev_temperature, MIN_TEMPERATURE_DIFF_FOR_EVENT);
   if (significant_difference) {
-    s72::DHTEvent::raise(this->pin, t, h);
+    s72::DHTEvent::raise(this->pin, t, h); // allen DHT-Listenern die Änderung mitteilen
     this->prev_humidity = h;
     this->prev_temperature = t;
   }

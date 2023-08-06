@@ -40,7 +40,7 @@ s72::MQ135Reader::MQ135Reader(byte const pin, float const rzero, float const rlo
   startup_time = millis();
 }
 
-bool s72::MQ135Reader::is_preheating() {
+bool s72::MQ135Reader::is_preheating() const {
   return (millis() - this->startup_time) <= s72::MQ135Reader::PREHEAT_DURATION_MS;
 }
 
@@ -52,21 +52,25 @@ void s72::MQ135Reader::update() {
   // Sensor ignorieren, solange er nicht ausreichend aufgeheizt ist (kann mit ignorePreheat() übersteuert werden)
   if (is_preheating() && !this->ignore_preheat) return;
 
-  if ((millis() - this->lastReadTime) < this->readDelayMs) return;
+  // zeitlichen Mindestabstand zwischen zwei Messungen einhalten
+  unsigned long const now = millis();
+  if ((now - this->lastReadTime) < this->readDelayMs) return;
 
   // Widerstand des Sensors auslesen
-  int const val = analogRead(this->pin);
+  unsigned int const val = analogRead(this->pin);
 #ifdef ESP32DEVKIT
-  float const resistance = ((4095.0 / (float)val) - 1.0) * this->rload; // FixMe: 1023.0 stimmt nur, wenn der ADC eine Auflösung von 10 bit hat!
+  // Auflösung des Analogports am ESP: 12 bit (0..4095)
+  float const resistance = ((4095.0 / (float)val) - 1.0) * this->rload;
 #else
-  float const resistance = ((1023.0 / (float)val) - 1.0) * this->rload; // FixMe: 1023.0 stimmt nur, wenn der ADC eine Auflösung von 10 bit hat!
+  // Auflösung des Analogports am Arduino: 10 bit (0..1023)
+  float const resistance = ((1023.0 / (float)val) - 1.0) * this->rload;
 #endif
 
   // Physik- und Mathe-Voodoo anwenden, um ppm bzw. korrigierte ppm auszurechnen (siehe MQ135-lib: https://github.com/Phoenix1747/MQ135)
   float const rzero = resistance * VOODOO;
   float const ppm = PARA * pow((resistance / this->rzero), -PARB);;
 
-  // Korrigierte Werte sind nur möglich, wenn Temperatur und Luftfeuchtigkeit bekannt sind
+  // Werte korrigieren, falls Temperatur und Luftfeuchtigkeit bekannt sind
   float correctedRZero;
   float correctedPPM;
   int diff;
@@ -82,6 +86,7 @@ void s72::MQ135Reader::update() {
     diff = abs(ppm - this->prev_ppm);
   }
 
+  // MQ135-Listener informieren, falls sich der PPM-Wert signifikant verändert hat
   if (diff >= s72::MQ135Reader::MIN_PPM_DIFF_FOR_EVENT) {
     MQ135Event::raise(
       this->pin,
@@ -95,6 +100,8 @@ void s72::MQ135Reader::update() {
     this->prev_correctedPPM = correctedPPM;
     this->prev_ppm = ppm;
   }
+
+  this->lastReadTime = millis();
 }
 
 void s72::MQ135Reader::calibrate(float const temperature, float const humidity) {
