@@ -4,7 +4,7 @@
 
 s72::Buzzer::Buzzer(byte const pin) : pin(pin) {}
 
-void s72::Buzzer::sound(unsigned int const freq) {
+void s72::Buzzer::hw_sound(unsigned int const freq) const {
   if (this->silent) return;
 #ifdef ESP32DEVKIT
   ledcAttachPin(this->pin, pwm_channel);
@@ -14,7 +14,7 @@ void s72::Buzzer::sound(unsigned int const freq) {
 #endif
 }
 
-void s72::Buzzer::noSound() {
+void s72::Buzzer::hw_noSound() const {
 #ifdef ESP32DEVKIT
   ledcDetachPin(this->pin);
 #else
@@ -83,7 +83,7 @@ void s72::Buzzer::keysound(unsigned int const frequency, unsigned long const dur
 void s72::Buzzer::setSilent(bool const silent) {
   this->silent = silent;
   if (silent) {
-    noSound();
+    hw_noSound();
   }
 }
 
@@ -95,7 +95,7 @@ void s72::Buzzer::setup() {
   int const resolution_bits = 12;
   ledcSetup(pwm_channel, pwm_frequency, resolution_bits);
 #endif
-  noSound();
+  hw_noSound();
   this->current_state = s72::BuzzerState::idle;
   Serial.print(F("Buzzer setup done (pin "));
   Serial.print(this->pin);
@@ -114,7 +114,7 @@ void s72::Buzzer::update() {
     
     case s72::BuzzerState::start_sound:
     {
-      s72::Buzzer::sound(this->frequency);
+      hw_sound(this->frequency);
       switchToState(s72::BuzzerState::sound_is_on);
       break;
     }
@@ -128,7 +128,7 @@ void s72::Buzzer::update() {
 
     case s72::BuzzerState::end_sound:
     {
-      s72::Buzzer::noSound();
+      hw_noSound();
       switchToState(s72::BuzzerState::sound_is_off);
       break;
     }

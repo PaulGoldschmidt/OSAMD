@@ -31,8 +31,7 @@ void s72::Button::init()
 }
 
 
-unsigned long const s72::Button::stateDuration()
-{
+unsigned long const s72::Button::stateDuration() const {
   return millis() - this->lastStateChangeTime;
 }
 
@@ -70,7 +69,7 @@ void s72::Button::update()
   // hat sich der entprellte Zustand des Tasters geändert?
   if (current_read == this->currentStableState) return;
 
-  // Dauer des vorheigen Zustands ausrechnen (this->currentStateStartTime enthält noch den vorherigen Zustand)
+  // Dauer des vorherigen Zustands feststellen (this->currentStateStartTime enthält noch den vorherigen Zustand)
   unsigned long duration_last_state = now - this->currentStateStartTime;
   // Änderung des Zustands per Event melden (this->is_pressed enthält noch den vorherigen Zustand)
   if (this->is_pressed) {
@@ -81,7 +80,7 @@ void s72::Button::update()
     //ButtonPressedEvent::raise(this->pin, duration_last_state);
   }
 
-  // Jetzigen Zustand merken
+  // jetzigen Zustand merken
   this->currentStableState = current_read;
   this->currentStateStartTime = now;
   this->is_pressed = this->currentStableState == (this->high_means_pressed ? HIGH : LOW);

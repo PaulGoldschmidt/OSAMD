@@ -6,6 +6,7 @@
 
 namespace s72 {
 
+// mögliche Zustände des Buzzers
 enum class BuzzerState
 {
   idle,
@@ -29,7 +30,6 @@ private:
 
   int const pwm_channel = 0;
 
-
   bool silent = false;
 
   Buzzer() = default;
@@ -37,8 +37,8 @@ private:
   void switchToState(BuzzerState const new_state);
   void switchToState(BuzzerState const new_state, unsigned long const time);
 
-  void sound(unsigned int const freq);
-  void noSound();
+  void hw_sound(unsigned int const freq) const;
+  void hw_noSound() const;
 
 
 public:
