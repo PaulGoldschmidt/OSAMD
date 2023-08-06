@@ -1567,8 +1567,8 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 6b3affac-324f-4c65-97c1-60affb58a49c)
   )
-  (text "https://www.codrey.com/electronic-circuits/how-to-use-mq-135-gas-sensor/"
-    (at 160.02 43.18 0)
+  (text "https://www.codrey.com/electronic-circuits/how-to-use-mq-135-gas-sensor/\nSpannungteiler notwendig, da der D1 Mini nur 3V verträgt"
+    (at 160.02 44.45 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 7d4c5986-2970-4931-896c-7ae6051fc5b3)
   )
@@ -1576,12 +1576,12 @@
     (effects (font (size 1.27 1.27) (thickness 0.254) bold) (justify left bottom))
     (uuid 8c4f57ef-ce1d-4970-a221-5cc9c42fca79)
   )
-  (text "WEMOS D1 Mini\n11 I/O Pins, alle bis auf D0 sind PWM-, I2C- und \nOne-Wire fähig, Imax ist 12 mA.\nD4 ist die Onboard-LED"
-    (at 62.23 160.02 0)
+  (text "WEMOS D1 Mini\n11 I/O Pins, alle bis auf D0 sind PWM-, I2C- und \nOne-Wire fähig, Imax ist 12 mA.\nD4 ist die Onboard-LED (Flashen nicht möglich,\nwenn auf LOW gezogen!)"
+    (at 62.23 161.29 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 8f03773b-87fc-4bb0-b9b8-588777f41139)
   )
-  (text "DHT11/22 benötigt einen Pull-Up an der Datenleitung.\nMaximal alle 1000 ms auslesen, besser länger warten,\nsonst hört der DHT auf, Daten zu liefern"
+  (text "DHT11/22 benötigt einen Pull-Up an der Datenleitung.\nMaximal alle 1000 ms (DHT11) bzw. 2000 ms (DHT22)\nauslesen, besser länger warten, sonst hört der DHT\nauf, Daten zu liefern"
     (at 185.42 57.15 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 939c7f25-5c81-499b-8bf2-5cc9ea6daa47)
