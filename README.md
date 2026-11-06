@@ -1,3 +1,8 @@
+> [!IMPORTANT]  
+> Nach knapp 2000 gebauten OSAMD-Bausätzen und vielen, vielen tollen Erinnerungen, habe ich entschlossen, dieses Projekt als abgeschlossen als eine der positiven Outcomes der COVID-Saga hier zu archivieren. Danke, an alle die mitgeholfen, unterstützt und einfach nur das Projekt verbreitet haben! Einen kleinen Abschiedsartikel habe ich auf [meinem Blog](https://p3g3.de/adios-osamd-eine-kurze-nachlese-zur-archivierung-des-open-source-air-monitoring-device-projekts/) veröffentlicht. 
+> 
+> Le OSAMD est mort, vive le OSAMD!
+
 # Wie man ein Luftqualitätssensor mit einem niedrigen Budget baut: Das OSAMD-Projekt
 Hohe Luftqualität ist wichtig. Eigentlich schon immer, denn in besserer Luft kann man sich länger konzentrieren. Grade in der Schule ist das Thema doch jetzt wichtiger denn je, denn dank COVID-19 müssen in vielen Schulen Deutschlands regelmäßig Lüftungspausen eingelegt werden. Was ansich gut ist, wird im Winter von Tag zu Tag schwieriger umzusetzen: Das kalte Klima und die Heizungen im Klassenzimmer führen so täglich einen Kampf um die Lufttemperatur, bei der die Heizung nur unter erheblicher Wärmeabgabe die Luft aufwärmen kann, was zu enormen Steigerungen der Heizungskosten und einem erhöhtem CO2-Ausstoß führt.
 
